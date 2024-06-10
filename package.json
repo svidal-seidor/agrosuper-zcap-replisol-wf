@@ -1,0 +1,56 @@
+{
+  "name": "zcap-replisol-wf",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@sap-cloud-sdk/connectivity": "^3.15.0",
+    "@sap-cloud-sdk/http-client": "^3.15.0",
+    "@sap-cloud-sdk/resilience": "^3.15.0", 
+    "@sap/cds": "^7",
+    "@sap/xssec": "^3",
+    "express": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^7",
+    "@sap/eslint-plugin-cds": "^3",
+    "eslint": "^9"
+  },
+  "scripts": {
+    "start": "cds-serve"
+  },
+  "cds": {
+    "requires": {
+      "ODATA_ECC1": {
+        "kind": "odata-v2",
+        "model": "srv/external/ODATA_ECC1",
+        "[production]": {
+          "credentials": {
+            "destination": "ODATA_ECC1",
+            "path": "/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV"
+          }
+        }
+      },
+      "Workflow_Precios": {
+        "kind": "odata",
+        "model": "srv/external/Workflow_Precios",
+        "[production]": {
+          "credentials": {
+            "destination": "Workflow_Precios",
+            "path": "/odata/v4/catalog"
+          }
+        }
+      },
+      "auth": "mocked",
+      "[production]": {
+        "auth": "xsuaa",
+        "db": "hana",
+        "connectivity": true,
+        "destinations": true
+      }
+    }
+  }
+}
