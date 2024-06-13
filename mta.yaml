@@ -2,37 +2,34 @@ _schema-version: '3.1'
 ID: zcap-replisol-wf
 version: 1.0.0
 description: "A simple CAP project."
-parameters:
-  enable-parallel-deployments: true
-build-parameters:
-  before-all:
-    - builder: custom
-      commands:
-        - npm ci
-        - npx cds build --production
 modules:
   - name: zcap-replisol-wf-srv
     type: nodejs
     path: gen/srv
+    requires:
+      - name: uua_zcap-replisol-wf
+      - name: zcap-replisol-wf-connectivity
+      - name: zcap-replisol-wf-destination
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
     parameters:
       buildpack: nodejs_buildpack
       readiness-health-check-type: http
       readiness-health-check-http-endpoint: /health
     build-parameters:
       builder: npm
-    provides:
-      - name: srv-api # required by consumers of CAP services (e.g. approuter)
-        properties:
-          srv-url: ${default-url}
-    requires:
-      - name: zcap-replisol-wf-auth
-      - name: zcap-replisol-wf-connectivity
-      - name: zcap-replisol-wf-destination
-      - name: zcap-replisol-wf-db
 
   - name: zcap-replisol-wf
     type: approuter.nodejs
     path: app/router
+    build-parameters:
+      ignore:
+        - 'default-*.json'
+        - .env
+        - '*node_modules*'
+        - package-lock.json
     parameters:
       keep-existing-routes: true
       disk-quota: 256M
@@ -44,38 +41,69 @@ modules:
           name: srv-api # must be used in xs-app.json as well
           url: ~{srv-url}
           forwardAuthToken: true
-      - name: zcap-replisol-wf-auth
+      - name: uua_zcap-replisol-wf
 
-  - name: zcap-replisol-wf-db-deployer
-    type: hdb
-    path: gen/db
-    parameters:
-      buildpack: nodejs_buildpack
+  - name: zcap-replisol-wf-destination-content
+    type: com.sap.application.content
     requires:
-      - name: zcap-replisol-wf-db
+      - name: zcap-replisol-wf-connectivity
+      - name: zcap-replisol-wf-destination
+        parameters:
+          content-target: true
+      - name: uua_zcap-replisol-wf
+        parameters:
+          service-key:
+            name: uua_zcap-replisol-wf-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Authentication: OAuth2UserTokenExchange
+              Name: approuter_uua_zcap-replisol-wf
+              ServiceInstanceName: zcap-replisol-wf-xsuaa
+              ServiceKeyName: uua_zcap-replisol-wf-key
+              sap.cloud.service: approuter
+          existing_destinations_policy: ignore
+    build-parameters:
+      no-source: true
 
 resources:
-  - name: zcap-replisol-wf-auth
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: xsuaa
-      service-plan: application
-      path: ./xs-security.json
-      config:
-        xsappname: zcap-replisol-wf-${org}-${space}
-        tenant-mode: dedicated
   - name: zcap-replisol-wf-connectivity
     type: org.cloudfoundry.managed-service
     parameters:
       service: connectivity
       service-plan: lite
+
   - name: zcap-replisol-wf-destination
     type: org.cloudfoundry.managed-service
     parameters:
+      config:
+        HTML5Runtime_enabled: true
+        version: 1.0.0
       service: destination
       service-plan: lite
-  - name: zcap-replisol-wf-db
-    type: com.sap.xs.hdi-container
+      service-name: zcap-replisol-wf-destination
+
+  - name: uua_zcap-replisol-wf
+    type: org.cloudfoundry.managed-service
     parameters:
-      service: hana
-      service-plan: hdi-shared
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+      service-name: zcap-replisol-wf-xsuaa
+      config:
+        xsappname: zcap-replisol-wf-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          redirect-uris:
+            - "https://*.hana.ondemand.com/**"
+            - "https://*.applicationstudio.cloud.sap/**"
+
+parameters:
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
