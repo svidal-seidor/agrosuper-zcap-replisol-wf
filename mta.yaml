@@ -10,16 +10,25 @@ modules:
       - name: uua_zcap-replisol-wf
       - name: zcap-replisol-wf-connectivity
       - name: zcap-replisol-wf-destination
+      - name: zcap-replisol-wf-db
     provides:
       - name: srv-api # required by consumers of CAP services (e.g. approuter)
         properties:
           srv-url: ${default-url}
     parameters:
       buildpack: nodejs_buildpack
-      readiness-health-check-type: http
       readiness-health-check-http-endpoint: /health
+      readiness-health-check-type: http
     build-parameters:
       builder: npm
+
+  - name: zcap-replisol-wf-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: zcap-replisol-wf-db
 
   - name: zcap-replisol-wf
     type: approuter.nodejs
@@ -68,12 +77,6 @@ modules:
       no-source: true
 
 resources:
-  - name: zcap-replisol-wf-connectivity
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: connectivity
-      service-plan: lite
-
   - name: zcap-replisol-wf-destination
     type: org.cloudfoundry.managed-service
     parameters:
@@ -84,13 +87,25 @@ resources:
       service-plan: lite
       service-name: zcap-replisol-wf-destination
 
+  - name: zcap-replisol-wf-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite
+
+  - name: zcap-replisol-wf-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
   - name: uua_zcap-replisol-wf
     type: org.cloudfoundry.managed-service
     parameters:
       path: ./xs-security.json
       service: xsuaa
-      service-plan: application
       service-name: zcap-replisol-wf-xsuaa
+      service-plan: application
       config:
         xsappname: zcap-replisol-wf-${org}-${space}
         tenant-mode: dedicated

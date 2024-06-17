@@ -9,7 +9,6 @@ service REPSOLECC{
 
     
 
-    function replicar () returns String;
-      function replicar2 () returns String;
+    function replicar (difHour : String) returns String;
     function versol () returns array of Campos;
 }

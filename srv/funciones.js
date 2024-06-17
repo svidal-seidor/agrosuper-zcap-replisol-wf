@@ -1,152 +1,193 @@
 
 const cds = require("@sap/cds");
-const { retrieveJwt } = require("@sap-cloud-sdk/core");
+const { uuid } = cds.utils
 
 
-function _getJWT(req) {
-  if (typeof req._ !== "undefined") {
-      return retrieveJwt(req._.req);
-  } else {
-      return "";
+function _formatDate(date_time){
+
+  try {
+      // get current date
+  // adjust 0 before single digit date
+  let date = ("0" + date_time.getDate()).slice(-2);
+  // get current month
+  let month = ("0" + (date_time.getMonth() + 1)).slice(-2);
+  // get current year
+  let year = date_time.getFullYear();
+  // get current hours
+  let hours =  ("0" + date_time.getHours()).slice(-2); 
+
+  // get current minutes
+  let minutes = ("0" + date_time.getMinutes()).slice(-2);
+  // get current seconds
+  let seconds =("0" + date_time.getSeconds()).slice(-2);
+  // prints date in YYYY-MM-DD format
+  let sFechaRequest = year + "-" + month + "-" + date + "T" + hours + ":" + minutes + ":" + seconds;
+
+  return sFechaRequest;
+  } catch (error) {
+    return "";
+  }
+
+}
+
+function _formatTime(date_time){
+
+  try {
+    let hours =  ("0" + date_time.getHours()).slice(-2); 
+
+    // get current minutes
+    let minutes = ("0" + date_time.getMinutes()).slice(-2);
+    // get current seconds
+    let seconds =("0" + date_time.getSeconds()).slice(-2);
+  
+    //let stime = "PT"+hours + "H" + minutes + "M" + seconds+"S";
+    let stime = hours + ":" + minutes + ":" + seconds;
+    
+    return stime;
+  } catch (error) {
+    return "";
+  }
+
+}
+
+async function _insertSolicitud(objSolicitud){
+
+  try {
+    let objNew  = {
+      "IDDCTOBTP":  uuid() ,
+      "FK_ZSD_TB_SECUENC_IDSECUENCIA": null,
+      "FK_ZSD_TB_REGLAS_IDREGLA": null,
+      "CODEJECUTIVO": objSolicitud.CodEjecutivo,
+      "DESCEJECUTIVO": objSolicitud.DescEjecutivo,
+      "PEDIDO": objSolicitud.Pedido,
+      "POSPEDIDO": objSolicitud.PosPedido,
+      "CODLOCAL": objSolicitud.CodLocal,
+      "DESCLOCAL": objSolicitud.DescLocal,
+      "CODPREVENTA": objSolicitud.CodPreventa,
+      "DESCPREVENTA": objSolicitud.DescPreventa,
+      "CODVENDEDOR": objSolicitud.CodVendedor,
+      "DESCVENDEDOR":objSolicitud.DescVendedor,
+      "CODCLIENTE": objSolicitud.CodCliente,
+      "DESCCLIENTE": objSolicitud.DescCliente,
+      "CODCENTRO": objSolicitud.CodCentro,
+      "CODMATERIAL": objSolicitud.CodMaterial,
+      "DESCMATERIAL": objSolicitud.DescMaterial,
+      "CODSECTOR": objSolicitud.CodSector,
+      "DESCSECTOR": objSolicitud.DescSector,
+      "CODESTADO": objSolicitud.CodEstado,
+      "DESCESTADO": objSolicitud.DescEstado,
+      "CODCLASIFICACION": objSolicitud.CodClasficacion,
+      "DESCCLASIFICACION": objSolicitud.DescClasificacion,
+      "PRECIOLISTAUNI": objSolicitud.PrecioListaUni,
+      "VALORRECARGOUNI": objSolicitud.ValorRecargoUni,
+      "PRECIOWFCONDSCTOUNI": objSolicitud.PrecioWFConDsctoUni,
+      "CANTIDAD":objSolicitud.Cantidad,
+      "UMV": objSolicitud.Umv,
+      "UMP": objSolicitud.Ump,
+      "PORCENTAJEDSCTO":objSolicitud.PorcentajeDscto,
+      "FECHADESPACHO":objSolicitud.FechaDespacho,
+      "CODMOTIVO": objSolicitud.CodMotivo,
+      "DESCMOTIVO": objSolicitud.DescMotivo,
+      "ESTATUS": objSolicitud.Estatus,
+      "CODUSERAPROB": objSolicitud.CodUserAprob,
+      "DESCUSERAPROB": objSolicitud.DescUserAprob,
+      "FECHARECEPSOL": objSolicitud.FechaRecepSol,
+      "HORARECEPSOL": objSolicitud.HoraRecepSol,
+      "FECHAAPROBSOL": null,
+      "HORAAPROBSOL": null,
+      "CODSUCURSALLOC": objSolicitud.CodSucursalLoc,
+      "DESCSUCURSALLOC": objSolicitud.DescSucursalLoc,
+      "CODTIPOCLIENTE": objSolicitud.CodTipocCiente,
+      "DESCTIPOCLIENTE": objSolicitud.DescTipoCliente,
+      "CODSBTPCLIENTE": objSolicitud.CodSbtpCliente,
+      "DESCSBTPCLIENTE": objSolicitud.DescSbtpCliente,
+      "CODGRCONDCLIENTE": objSolicitud.CodGrcondCliente,
+      "DESCGRCONDCLIENTE": objSolicitud.DescGrcondCliente,
+      "TIPOPROCES": null,
+      "CODMOTDERRECH": null,
+      "MOTDERRECH": null,
+      "PRECIOREGLA": null,
+      "CANTREGLA": null,
+      "PROCENTREGLA": null,
+      "FECHARECEPSOL_AUX": null,
+      "HORARECEPSOL_AUX": null,
+      }
+    
+      const backendConnectionWP = await cds.connect.to('Workflow_Precios')
+      const { ZSD_TB_SOL_MAT_DCTO_BTP } = backendConnectionWP.entities
+    
+      await backendConnectionWP.run(INSERT(objNew).into(ZSD_TB_SOL_MAT_DCTO_BTP))
+    
+  } catch (error) {
+    console.log(`WP - ReplicarSolicitudes: Error Solicitud: ${objSolicitud.Pedido} ${objSolicitud.PosPedido}: Error ${error}`)
+  }
+ 
+
+}
+
+function _init(){
+
+  Date.prototype.addHours = function(h) {
+    if(h.includes("+")){
+      this.setTime(this.getTime() + (Math.abs(h)*60*60*1000));
+    }else if(h.includes("-")){
+      this.setTime(this.getTime() - (Math.abs(h)*60*60*1000));
+    }else if(h == '0'){
+      return this;
+    }else{
+      return "error";
+    }
+    return this;
   }
 }
 
 async function Replicar(req) {
 
-
-
+    _init()
+    
+  //obtener fecha y horas actuales Chile
+  let date_time = new Date().addHours(req.data.difHour);
+  let sDate = _formatDate(date_time);
+  let sTime = _formatTime(date_time);
+  
   const backendConnection = await cds.connect.to('ODATA_ECC1')
   const { SolicitudesSet } = backendConnection.entities
 
-  const externalRequisitions = await backendConnection.run(SELECT(SolicitudesSet).where(`Estatus = \'P\' AND FechaRecepSol = \'2021-08-16T10:00:00\'`))
-  const response = { res: "Perfecto"}
-  console.log(externalRequisitions)
+  let sQuery = `FechaRecepSol = '${sDate}' and HoraRecepSol = '${sTime}' and  Estatus = 'P'`;
+  let queryResult = await backendConnection.run(SELECT(SolicitudesSet).where(sQuery))
 
-  const queryResult2 = await backendConnection.run(SELECT(SolicitudesSet).where(`FechaRecepSol = '2021-08-16T10:00:00' and HoraRecepSol = '00:00:00' and  Estatus = 'P'`))
+  if(queryResult.length > 0){
 
-  console.log(queryResult2)
+    const backendConnectionWP = await cds.connect.to('Workflow_Precios')
+    const { ZSD_TB_SOL_MAT_DCTO_BTP } = backendConnectionWP.entities
 
-/*  var jwt = _getJWT(req);
-  console.log("--------->1",jwt )
-*/
+    for(var ele in queryResult){
 
-  return externalRequisitions
+      let element = queryResult[ele]
 
-/*
-  passport.use('JWT', new xssec.JWTStrategy(xsenv.getServices({ uaa: { tag: 'xsuaa' } }).uaa));
-  app.use(passport.initialize());
-  app.use(passport.authenticate('JWT', { session: false }));
-      const response = await model2.run({
-      url: '/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/SolicitudesSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27',
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${req.user.token}`
-      }
-    });
-    
-
-
-    const model2 = await cds.connect.to('ODATA_ECC1')
-
-
-
-    const { SolicitudesSet, ParametrosSet } = model2.entities
-
-   ///odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/ParametrosSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27&$expand=Parametros_to_Solicitudes
-/////odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/
-//ParametrosSet?&$filter= 
-//FechaRecepSol eq datetime'2021-08-16T10:00:00' and 
-//HoraRecepSol ge time'PT00H00M00S' and 
-//Estatus eq 'P'&$expand=Parametros_to_Solicitudes
+      //Validar si el registro existe en la tabla de solicitudes
   
-const queryResult = await model2.run(SELECT(SolicitudesSet).where(`FechaRecepSol = '2021-08-16T10:00:00' and HoraRecepSol = '00:00:00' and  Estatus = 'P'`))
+      const existeSol = await backendConnectionWP.run(SELECT(ZSD_TB_SOL_MAT_DCTO_BTP).
+      where(`PEDIDO = '${element.Pedido}' and POSPEDIDO = '${element.PosPedido}'`))
+  
+      if(existeSol){
+        _insertSolicitud.apply(element);
+      }
+  
+    }
 
-    console.log("queryResult", queryResult)
+ 
+    console.log(`WP - ReplicarSolicitudes: Registros ${queryResult.length} procesados`)
+    return `Registros ${queryResult.length} procesados`;
+  }else{
 
-    return queryResult;
-
-    */
-   
+    console.log("WP - ReplicarSolicitudes: No hay registros para procesar")
+  }
+  
 
 }
 
 
-async function Replicar2(req) {
-
-
-    try {
-        // Conectar al destino configurado
-        const destination = await cds.connect.to('ODATA_ECC1');
-        var jwt = _getJWT(req);
-        console.log("--------->1",jwt )
-
-        
-      console.log('Connecting to destination', destination);
-
-      // Configuración de la solicitud OData V2
-      const odataRequestConfig = new ODataRequestConfig({
-        method: 'GET',
-        url: '/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/SolicitudesSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27',
-      });
-      const odataRequest = new ODataRequest(odataRequestConfig);
-
-      const response = await executeHttpRequest(destination, odataRequest);
-
-      console.log('Response from service:', response);
-      return response.data;
-
-    /*      // Realizar la llamada HTTP utilizando @sap-cloud-sdk/core
-      const response2 = await executeHttpRequest(destination, {
-        method: 'GET',
-        url: '/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/SolicitudesSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27',
-      });
-
-      return response2.data;
-      */
-
-/*
-        console.log(req.user);
-        // Hacer una llamada al servicio externo
-        const response = await destination.run({
-          url: '/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/SolicitudesSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27',
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${req.user.token}`
-          }
-        });
-  
-        return response;
-        */
-      } catch (error) {
-        console.error('Error during request to remote service:', error);
-        req.error(500, 'Failed to load destinationsss');
-      }
-
-
-    /*
-    console.log("dedededed");
-
-    const model2 = await cds.connect.to('ODATA_ECC1')
-
-    
-
-    const { SolicitudesSet, ParametrosSet } = model2.entities
-
-   ///odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/ParametrosSet?&$filter=%20FechaRecepSol%20eq%20datetime%272021-08-16T10:00:00%27%20and%20HoraRecepSol%20ge%20time%27PT00H00M00S%27%20and%20Estatus%20eq%20%27P%27&$expand=Parametros_to_Solicitudes
-/////odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV/
-//ParametrosSet?&$filter= 
-//FechaRecepSol eq datetime'2021-08-16T10:00:00' and 
-//HoraRecepSol ge time'PT00H00M00S' and 
-//Estatus eq 'P'&$expand=Parametros_to_Solicitudes
-  
-const queryResult = await model2.run(SELECT(SolicitudesSet).where(`FechaRecepSol = '2021-08-16T10:00:00' and HoraRecepSol = '00:00:00' and  Estatus = 'P'`))
-
-    console.log("queryResult", queryResult)
-
-    return queryResult;
-    */
-
-}
 
 async function VerSolicitudes(req) {
 
@@ -164,5 +205,5 @@ async function VerSolicitudes(req) {
 }
 
 module.exports = {
-    Replicar, VerSolicitudes, Replicar2
+    Replicar, VerSolicitudes
 }
