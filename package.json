@@ -36,7 +36,8 @@
         "[production]": {
           "credentials": {
             "destination": "ODATA_ECC1",
-            "path": "/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV"
+            "path": "/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV",
+            "requestTimeout": 80000
           }
         }
       },
