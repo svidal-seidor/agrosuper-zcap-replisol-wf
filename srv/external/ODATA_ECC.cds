@@ -2,7 +2,7 @@
 @cds.external : true
 @m.IsDefaultEntityContainer : 'true'
 @sap.supported.formats : 'atom json xlsx'
-service ODATA_ECC1 {};
+service ODATA_ECC {};
 
 @cds.external : true
 @cds.persistence.skip : true
@@ -11,7 +11,7 @@ service ODATA_ECC1 {};
 @sap.updatable : 'false'
 @sap.deletable : 'false'
 @sap.pageable : 'false'
-entity ODATA_ECC1.SolicitudesSet {
+entity ODATA_ECC.SolicitudesSet {
   @sap.creatable : 'false'
   @sap.updatable : 'false'
   @sap.sortable : 'false'
@@ -301,7 +301,7 @@ entity ODATA_ECC1.SolicitudesSet {
 @sap.updatable : 'false'
 @sap.deletable : 'false'
 @sap.pageable : 'false'
-entity ODATA_ECC1.ParametrosSet {
+entity ODATA_ECC.ParametrosSet {
   @odata.Type : 'Edm.DateTime'
   @odata.Precision : 7
   @sap.creatable : 'false'
@@ -323,6 +323,6 @@ entity ODATA_ECC1.ParametrosSet {
   @sap.label : 'Estatus'
   key Estatus : String(1) not null;
   @cds.ambiguous : 'missing on condition?'
-  Parametros_to_Solicitudes : Association to many ODATA_ECC1.SolicitudesSet on Parametros_to_Solicitudes.Estatus = Estatus and Parametros_to_Solicitudes.HoraRecepSol = HoraRecepSol and Parametros_to_Solicitudes.FechaRecepSol = FechaRecepSol;
+  Parametros_to_Solicitudes : Association to many ODATA_ECC.SolicitudesSet on Parametros_to_Solicitudes.Estatus = Estatus and Parametros_to_Solicitudes.HoraRecepSol = HoraRecepSol and Parametros_to_Solicitudes.FechaRecepSol = FechaRecepSol;
 };
 

@@ -249,8 +249,9 @@ entity Workflow_Precios.ZSD_TB_SOL_MAT_DCTO_BTP {
   ESTATUS : String(1);
   CODUSERAPROB : String(12);
   DESCUSERAPROB : String(50);
-  FECHARECEPSOL : String(10);
-  HORARECEPSOL : String(8);
+  @sap.display.format : 'Date'
+  FECHARECEPSOL : Date;
+  HORARECEPSOL : Time;
   FECHAAPROBSOL : String(10);
   HORAAPROBSOL : String(8);
   CODSUCURSALLOC : String(4);

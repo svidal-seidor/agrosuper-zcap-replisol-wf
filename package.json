@@ -26,16 +26,16 @@
   },
   "cds": {
     "requires": {
-      "ODATA_ECC1": {
+      "ODATA_ECC": {
         "kind": "odata-v2",
-        "model": "srv/external/ODATA_ECC1",
+        "model": "srv/external/ODATA_ECC",
         "credentials": {
-          "destination": "ODATA_ECC1",
+          "destination": "ODATA_ECC",
           "path": "/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV"
         },
         "[production]": {
           "credentials": {
-            "destination": "ODATA_ECC1",
+            "destination": "ODATA_ECC",
             "path": "/odata/SAP/ZSD_WF_GETDATA_SOLIC_DSCTO_SRV",
             "requestTimeout": 80000
           }
